@@ -1,3 +1,5 @@
+// InfiniteLogoScroller.js
+
 import React, { useEffect } from "react";
 import "./InfiniteLogoScroller.css";
 
@@ -5,36 +7,40 @@ const InfiniteLogoScroller = () => {
   useEffect(() => {
     const scrollers = document.querySelectorAll(".scroller");
 
-    // If a user hasn't opted in for reduced motion, then we add the animation
+    // If a user hasn't opted in for reduced motion, then add the animation
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       addAnimation();
     }
 
     function addAnimation() {
-      scrollers.forEach((scroller) => {
-        // add data-animated="true" to every `.scroller` on the page
-        scroller.setAttribute("data-animated", true);
-        // Make an array from the elements within `.scroller-inner`
+      scrollers.forEach(addAnimationToScroller);
+    }
+
+    function addAnimationToScroller(scroller) {
+      // Add data-animated="true" to every `.scroller` on the page
+      scroller.setAttribute("data-animated", true);
+
+      // Clone and append elements only if no cloned elements exist
+      if (!clonedElementsExist(scroller)) {
         const scrollerInner = scroller.querySelector(".scroller__inner");
         const scrollerContent = Array.from(scrollerInner.children);
 
-        // Check if cloned elements already exist
-        const existingClones = Array.from(scrollerInner.children).filter(
-          (item) => item.getAttribute("aria-hidden") === "true"
-        );
+        // For each item in the array, clone it, add aria-hidden, and append
+        scrollerContent.forEach((item) => {
+          const duplicatedItem = item.cloneNode(true);
+          duplicatedItem.setAttribute("aria-hidden", true);
+          scrollerInner.appendChild(duplicatedItem);
+        });
+      }
+    }
 
-        // If no cloned elements exist, proceed with cloning and appending
-        if (existingClones.length === 0) {
-          // For each item in the array, clone it
-          // add aria-hidden to it
-          // add it into the `.scroller-inner`
-          scrollerContent.forEach((item) => {
-            const duplicatedItem = item.cloneNode(true);
-            duplicatedItem.setAttribute("aria-hidden", true);
-            scrollerInner.appendChild(duplicatedItem);
-          });
-        }
-      });
+    function clonedElementsExist(scroller) {
+      const scrollerInner = scroller.querySelector(".scroller__inner");
+      const existingClones = Array.from(scrollerInner.children).filter(
+        (item) => item.getAttribute("aria-hidden") === "true"
+      );
+
+      return existingClones.length > 0;
     }
   }, []); // Empty dependency array to run the effect only once
 
@@ -54,7 +60,7 @@ const InfiniteLogoScroller = () => {
         </ul>
       </div>
 
-      <div className="scroller" data-direction="right" data-speed="fast">
+      <div className="scroller" data-direction="right" data-speed="slow">
         <div className="scroller__inner">
           <img src="https://i.pravatar.cc/150?img=1" alt="" />
           <img src="https://i.pravatar.cc/150?img=2" alt="" />
